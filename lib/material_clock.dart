@@ -31,10 +31,10 @@ class Clock extends StatefulWidget {
   ///
   /// Note, that date is ignored, so you can set only specific time.
   final DateTime time;
-  
+
   /// Optional callback upon each tick, to align external actions with
   /// when the second hand moves
-  void Function()? onTick;
+  VoidCallback? onTick;
 
   // Timezone offset of this clock. For example, Duration(hour:-3, minute:30) is equal to "-3:30" zone
   final Duration timezoneOffset;
@@ -49,6 +49,7 @@ class Clock extends StatefulWidget {
     this.backgroundStyle = PaintingStyle.fill,
     this.alignment = Alignment.center,
     this.timezoneOffset = Duration.zero,
+    this.onTick,
   });
 
   @override
@@ -62,9 +63,7 @@ class Clock extends StatefulWidget {
 class _ClockState extends State<Clock> {
   DateTime time;
 
-  _ClockState({
-    required this.time
-  });
+  _ClockState({required this.time});
 
   @override
   void initState() {
@@ -98,7 +97,7 @@ class _ClockState extends State<Clock> {
   }
 
   update(Timer timer) {
-    widget.onTick!();
+    widget.onTick?.call();
     setState(() {
       time = (widget.timezoneOffset != Duration.zero)
           ? DateTime.now().toUtc()
