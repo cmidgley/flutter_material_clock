@@ -33,32 +33,23 @@ class Clock extends StatefulWidget {
   final DateTime time;
 
   // Timezone offset of this clock. For example, Duration(hour:-3, minute:30) is equal to "-3:30" zone
-  Duration timezoneOffset;
-
-  bool _needToAddOffset = false;
+  final Duration timezoneOffset;
 
   /// Widget `Clock` implements simple and awesome material clock for your app!
   Clock({
-    @required this.time,
+    required this.time,
     this.size = double.infinity,
     this.secondHandColor = Colors.redAccent,
     this.live = false,
     this.theme = Brightness.light,
     this.backgroundStyle = PaintingStyle.fill,
     this.alignment = Alignment.center,
-    this.timezoneOffset,
-  }) {
-    if (timezoneOffset != null) {
-      _needToAddOffset = true;
-    } else {
-      this.timezoneOffset = Duration.zero;
-    }
-    ;
-  }
+    this.timezoneOffset = Duration.zero,
+  });
 
   @override
   _ClockState createState() => _ClockState(
-        time: _needToAddOffset
+        time: this.timezoneOffset != Duration.zero
             ? this.time.toUtc().add(this.timezoneOffset)
             : this.time,
       );
@@ -68,12 +59,13 @@ class _ClockState extends State<Clock> {
   DateTime time;
 
   _ClockState({
-    @required this.time,
+    required this.time,
   });
 
   @override
   void initState() {
     ticker.setupUpdating(update);
+    super.initState();
   }
 
   @override
@@ -103,7 +95,9 @@ class _ClockState extends State<Clock> {
 
   update(Timer timer) {
     setState(() {
-      time = widget._needToAddOffset ? DateTime.now().toUtc() : DateTime.now();
+      time = (widget.timezoneOffset != Duration.zero)
+          ? DateTime.now().toUtc()
+          : DateTime.now();
       time = time.add(widget.timezoneOffset);
     });
   }
@@ -123,7 +117,7 @@ class _ClockPainter extends CustomPainter {
   final Color secondLineColor;
 
   const _ClockPainter({
-    this.time,
+    required this.time,
     this.theme = Brightness.light,
     this.backgroundStyle = PaintingStyle.fill,
     this.secondLineColor = Colors.redAccent,
@@ -131,24 +125,25 @@ class _ClockPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    ClockColors clockColors = ClockColors(this.theme, this.backgroundStyle);
     final radius = size.shortestSide / 2;
     final offset = Offset(
       size.width / 2,
       size.height / 2,
     );
     final scalefactor = radius / 100;
-    final h = time?.hour ?? 0;
-    final m = time?.minute ?? 0;
-    final s = time?.second ?? 0;
-    final hourRadian =
-        remap(h + normalize(m, 0, 60), 0, 24, 0, math.pi * 4) - (math.pi / 2);
+    final hourRadian = remap(
+            time.hour + normalize(time.minute, 0, 60), 0, 24, 0, math.pi * 4) -
+        (math.pi / 2);
     final minuteRaidan =
-        remap(m + normalize(s, 0, 60), 0, 60, 0, math.pi * 2) - (math.pi / 2);
-    final secondRaidan = remap(s, 0, 60, 0, math.pi * 2) - (math.pi / 2);
+        remap(time.minute + normalize(time.second, 0, 60), 0, 60, 0, math.pi * 2) -
+            (math.pi / 2);
+    final secondRaidan =
+        remap(time.second, 0, 60, 0, math.pi * 2) - (math.pi / 2);
 
     // background
     Paint background = Paint()
-      ..color = backgroundColors[this.theme][this.backgroundStyle]
+      ..color = clockColors.background
       ..strokeWidth = backgroundStrokeWidth * scalefactor
       ..style = this.backgroundStyle;
     var circleRadius = radius;
@@ -158,7 +153,7 @@ class _ClockPainter extends CustomPainter {
     canvas.drawCircle(offset, circleRadius, background);
 
     Paint bigLines = Paint()
-      ..color = lineColors[this.theme]
+      ..color = clockColors.line
       ..strokeCap = StrokeCap.round
       ..strokeWidth = hourStrokeWidth * scalefactor
       ..style = PaintingStyle.stroke;
@@ -217,7 +212,7 @@ class _ClockPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ClockPainter oldDelegate) {
-    return oldDelegate?.time?.isBefore(this.time) ?? false;
+    return oldDelegate.time.isBefore(this.time);
   }
 }
 
@@ -229,18 +224,24 @@ double normalize(n, start, stop) {
   return remap(n, start, stop, 0, 1);
 }
 
-const backgroundColors = {
-  Brightness.light: {
-    PaintingStyle.fill: Colors.white,
-    PaintingStyle.stroke: Colors.black,
-  },
-  Brightness.dark: {
-    PaintingStyle.fill: Colors.black,
-    PaintingStyle.stroke: Colors.white,
-  },
-};
+class ClockColors {
+  late Brightness _brightness;
+  late PaintingStyle _paintingStyle;
 
-const lineColors = {
-  Brightness.light: Colors.black,
-  Brightness.dark: Colors.white,
-};
+  ClockColors(this._brightness, this._paintingStyle);
+
+  Color get line {
+    return (this._brightness == Brightness.light) ? Colors.black : Colors.white;
+  }
+
+  Color get background {
+    if (this._brightness == Brightness.light)
+      return (this._paintingStyle == PaintingStyle.fill)
+          ? Colors.white
+          : Colors.black;
+    else
+      return (this._paintingStyle == PaintingStyle.fill)
+          ? Colors.black
+          : Colors.white;
+  }
+}
