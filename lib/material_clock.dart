@@ -57,9 +57,11 @@ class Clock extends StatefulWidget {
 
 class _ClockState extends State<Clock> {
   DateTime time;
+  void Function()? onTick;
 
   _ClockState({
     required this.time,
+    this.onTick,
   });
 
   @override
@@ -94,6 +96,7 @@ class _ClockState extends State<Clock> {
   }
 
   update(Timer timer) {
+    this.onTick!();
     setState(() {
       time = (widget.timezoneOffset != Duration.zero)
           ? DateTime.now().toUtc()
@@ -135,9 +138,9 @@ class _ClockPainter extends CustomPainter {
     final hourRadian = remap(
             time.hour + normalize(time.minute, 0, 60), 0, 24, 0, math.pi * 4) -
         (math.pi / 2);
-    final minuteRaidan =
-        remap(time.minute + normalize(time.second, 0, 60), 0, 60, 0, math.pi * 2) -
-            (math.pi / 2);
+    final minuteRaidan = remap(time.minute + normalize(time.second, 0, 60), 0,
+            60, 0, math.pi * 2) -
+        (math.pi / 2);
     final secondRaidan =
         remap(time.second, 0, 60, 0, math.pi * 2) - (math.pi / 2);
 
