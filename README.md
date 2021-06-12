@@ -16,14 +16,14 @@ Chic and awesome watch for your application!
 
 Open `pubspec.yaml` and add to `dependency` name of this package:
 
-``` yaml
+```yaml
 dependencies:
-  material_clock: any
+    material_clock: any
 ```
 
 After this, run command:
 
-``` sh
+```sh
 $ flutter pub get
 ```
 
@@ -35,7 +35,7 @@ Voila! Installation is done!
 
 Basically, you jest need to create new widget, and set some parameters:
 
-``` dart
+```dart
 import 'package:material_clock/material_clock.dart' as materialClock;
 
 materialClock.Clock(
@@ -47,17 +47,24 @@ materialClock.Clock(
   live: true,                              // If true, than clocks will update every second. If false, than hands position will be fixed.
   size: 400.0,                             // Size of your widget. By default it is `double.infinty`.
   time: DateTime.now(),                    // Which time you want to render. By default it is current time.
+  onTick: () => print("Got a tick!");      // option callback event that triggers exactly when the second hand moves
 );
 ```
 
+## Null safety
+
+Supports null safety
+
 ## Contributing
 
-Please read [contributing guide](https://github.com/xelaj/flutter_material_clock/blob/master/doc/en_US/CONTRIBUTING.md) if you want to help. And the help is very necessary!
+Please read [contributing guide](https://github.com/xelaj/flutter_material_clock/blob/master/doc/en_US/CONTRIBUTING.md)
+if you want to help. And the help is very necessary!
 
 ## Authors
 
-* **Richard Cooper** — [ololosha228](https://github.com/ololosha228)
+-   **Richard Cooper** — [ololosha228](https://github.com/ololosha228)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/xelaj/flutter_material_clock/blob/master/doc/ru_RU/LICENSE.md) file for details
+This project is licensed under the MIT License - see the
+[LICENSE](https://github.com/xelaj/flutter_material_clock/blob/master/doc/ru_RU/LICENSE.md) file for details
